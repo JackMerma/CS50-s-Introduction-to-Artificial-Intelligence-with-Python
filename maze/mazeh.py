@@ -2,11 +2,12 @@ import sys
 import heapq
 
 class Node():
-    def __init__(self, state, parent, action, heuristicValue):
+    def __init__(self, state, parent, action, heuristicValue, parentsCount):
         self.state = state
         self.parent = parent
         self.action = action
         self.heuristicValue = heuristicValue
+        self.parentsCount = parentsCount
     def __lt__(self, n2):
         return self.heuristicValue < n2.heuristicValue
 
@@ -141,7 +142,7 @@ class Maze():
         self.num_explored = 0
 
         # Initialize frontier to just the starting position
-        start = Node(state=self.start, parent=None, action=None, heuristicValue=None)
+        start = Node(state=self.start, parent=None, action=None, heuristicValue=None, parentsCount=0)
         frontier = HeapFrontier()
         frontier.add(start)
 
@@ -179,7 +180,8 @@ class Maze():
             for action, state in self.neighbors(node.state):
                 if not frontier.contains_state(state) and state not in self.explored:
                     heuristicValue = self.heuristic(goal=self.goal, state=state)
-                    child = Node(state=state, parent=node, action=action, heuristicValue=heuristicValue)
+                    child = Node(state=state, parent=node, action=action, heuristicValue=heuristicValue + node.parentsCount + 1, parentsCount=node.parentsCount + 1)
+                    print("PADRES: ", node.parentsCount + 1)
                     frontier.add(child)
 
 
@@ -245,4 +247,4 @@ m.solve()
 print("States Explored:", m.num_explored)
 print("Solution:")
 m.print()
-m.output_image("mazeh.png", show_explored=True)
+m.output_image("example2a.png", show_explored=True)
