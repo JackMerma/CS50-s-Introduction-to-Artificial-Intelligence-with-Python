@@ -135,8 +135,10 @@ class Maze():
         return abs(i - iGoal) + abs(j - jGoal)
 
 
-    def solve(self):
-        """Finds a solution to maze, if one exists."""
+    def solve(self, optimizeHeuristic):
+        """Finds a solution to maze, if one exists.
+           Optimize the heuristic means to use g(n) cost (A* seach)
+        """
 
         # Keep track of number of states explored
         self.num_explored = 0
@@ -180,8 +182,8 @@ class Maze():
             for action, state in self.neighbors(node.state):
                 if not frontier.contains_state(state) and state not in self.explored:
                     heuristicValue = self.heuristic(goal=self.goal, state=state)
-                    child = Node(state=state, parent=node, action=action, heuristicValue=heuristicValue + node.parentsCount + 1, parentsCount=node.parentsCount + 1)
-                    print("PADRES: ", node.parentsCount + 1)
+                    totalHeuristicCost = heuristicValue + node.parentsCount + 1 if optimizeHeuristic == True else heuristicValue
+                    child = Node(state=state, parent=node, action=action, heuristicValue=totalHeuristicCost, parentsCount=node.parentsCount + 1)
                     frontier.add(child)
 
 
@@ -243,8 +245,8 @@ m = Maze(sys.argv[1])
 print("Maze:")
 m.print()
 print("Solving...")
-m.solve()
+m.solve(optimizeHeuristic=True)
 print("States Explored:", m.num_explored)
 print("Solution:")
 m.print()
-m.output_image("example2a.png", show_explored=True)
+m.output_image("output.png", show_explored=True)
