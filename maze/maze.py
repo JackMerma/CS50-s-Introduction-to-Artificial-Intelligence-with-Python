@@ -2,14 +2,15 @@ import sys
 import heapq
 
 class Node():
-    def __init__(self, state, parent, action, heuristicValue, parentsCount):
+    def __init__(self, state, parent, action, weight, parentsCount):
         self.state = state
         self.parent = parent
         self.action = action
-        self.heuristicValue = heuristicValue
+        self.weight = weight
         self.parentsCount = parentsCount
+
     def __lt__(self, n2):
-        return self.heuristicValue < n2.heuristicValue
+        return self.weight < n2.weight
 
 
 class StackFrontier():
@@ -47,6 +48,7 @@ class QueueFrontier(StackFrontier):
 class HeapFrontier(StackFrontier):
     def add(self, node):
         heapq.heappush(self.frontier, node)
+
     def remove(self):
         if self.empty():
             raise Exception("empty frontier")
@@ -135,7 +137,7 @@ class Maze():
         return abs(i - iGoal) + abs(j - jGoal)
 
 
-    def solve(self, optimizeHeuristic):
+    def solve(self, optimizeHeuristic, frontier):
         """Finds a solution to maze, if one exists.
            Optimize the heuristic means to use g(n) cost (A* seach)
         """
@@ -144,8 +146,7 @@ class Maze():
         self.num_explored = 0
 
         # Initialize frontier to just the starting position
-        start = Node(state=self.start, parent=None, action=None, heuristicValue=None, parentsCount=0)
-        frontier = HeapFrontier()
+        start = Node(state=self.start, parent=None, action=None, weight=None, parentsCount=0)
         frontier.add(start)
 
         # Initialize an empty explored set
@@ -183,7 +184,7 @@ class Maze():
                 if not frontier.contains_state(state) and state not in self.explored:
                     heuristicValue = self.heuristic(goal=self.goal, state=state)
                     totalHeuristicCost = heuristicValue + node.parentsCount + 1 if optimizeHeuristic == True else heuristicValue
-                    child = Node(state=state, parent=node, action=action, heuristicValue=totalHeuristicCost, parentsCount=node.parentsCount + 1)
+                    child = Node(state=state, parent=node, action=action, weight=totalHeuristicCost, parentsCount=node.parentsCount + 1)
                     frontier.add(child)
 
 
@@ -238,15 +239,34 @@ class Maze():
         img.save(filename)
 
 
-if len(sys.argv) != 2:
-    sys.exit("Usage: python mazeh.py maze.txt")
+searchName = {"d":"DFS", "b":"BFS", "g":"Greedy BFS", "a":"A*"}
+
+if len(sys.argv) != 3:
+    sys.exit("Usage: python maze.py maze.txt searchType\nsearchType:\n + DFS(d)\n + BFS(b)\n + Greedy BFS(g)\n + A*(a)")
 
 m = Maze(sys.argv[1])
 print("Maze:")
 m.print()
+t = sys.argv[2]
 print("Solving...")
-m.solve(optimizeHeuristic=True)
+
+optimizeHeuristic = False
+
+if(t == "d"):
+    frontier = StackFrontier()
+elif(t == "b"):
+    frontier = QueueFrontier()
+elif(t == "g"):
+    frontier = HeapFrontier()
+elif(t == "a"):
+    frontier = HeapFrontier()
+    optimizeHeuristic = True
+else:
+    sys.exit("Invalid search type ", t)
+
+m.solve(optimizeHeuristic, frontier)
+
 print("States Explored:", m.num_explored)
 print("Solution:")
 m.print()
-m.output_image("output.png", show_explored=True)
+m.output_image(searchName[t] + ".png", show_explored=True)
