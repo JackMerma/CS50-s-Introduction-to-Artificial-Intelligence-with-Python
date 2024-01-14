@@ -69,3 +69,7 @@ function MIN-VALUE(state):
 ```
 
 So, a little bit intelligent?, that's the **Alpha-Beta Prunning** where if you have at the moment a value **K** of some node and another node secures you a **K'** result where **K>K'** (for **MAX-VAL**) or **K<K'** (for **MIN-VAL**), then you don't have to visit that state.
+
+## Bibliography
+Lecture: https://cs50.harvard.edu/ai/2024/notes/0/
+Slide: https://cdn.cs50.net/ai/2020/spring/lectures/0/lecture0.pdf
