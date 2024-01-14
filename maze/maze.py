@@ -1,10 +1,15 @@
 import sys
+import heapq
 
 class Node():
-    def __init__(self, state, parent, action):
+    def __init__(self, state, parent, action, heuristicValue, parentsCount):
         self.state = state
         self.parent = parent
         self.action = action
+        self.heuristicValue = heuristicValue
+        self.parentsCount = parentsCount
+    def __lt__(self, n2):
+        return self.heuristicValue < n2.heuristicValue
 
 
 class StackFrontier():
@@ -38,6 +43,15 @@ class QueueFrontier(StackFrontier):
             node = self.frontier[0]
             self.frontier = self.frontier[1:]
             return node
+
+class HeapFrontier(StackFrontier):
+    def add(self, node):
+        heapq.heappush(self.frontier, node)
+    def remove(self):
+        if self.empty():
+            raise Exception("empty frontier")
+        else:
+            return heapq.heappop(self.frontier)
 
 class Maze():
 
@@ -115,16 +129,23 @@ class Maze():
                 result.append((action, (r, c)))
         return result
 
+    def heuristic(self, goal, state):
+        iGoal, jGoal = goal
+        i, j = state
+        return abs(i - iGoal) + abs(j - jGoal)
 
-    def solve(self):
-        """Finds a solution to maze, if one exists."""
+
+    def solve(self, optimizeHeuristic):
+        """Finds a solution to maze, if one exists.
+           Optimize the heuristic means to use g(n) cost (A* seach)
+        """
 
         # Keep track of number of states explored
         self.num_explored = 0
 
         # Initialize frontier to just the starting position
-        start = Node(state=self.start, parent=None, action=None)
-        frontier = StackFrontier()
+        start = Node(state=self.start, parent=None, action=None, heuristicValue=None, parentsCount=0)
+        frontier = HeapFrontier()
         frontier.add(start)
 
         # Initialize an empty explored set
@@ -160,7 +181,9 @@ class Maze():
             # Add neighbors to frontier
             for action, state in self.neighbors(node.state):
                 if not frontier.contains_state(state) and state not in self.explored:
-                    child = Node(state=state, parent=node, action=action)
+                    heuristicValue = self.heuristic(goal=self.goal, state=state)
+                    totalHeuristicCost = heuristicValue + node.parentsCount + 1 if optimizeHeuristic == True else heuristicValue
+                    child = Node(state=state, parent=node, action=action, heuristicValue=totalHeuristicCost, parentsCount=node.parentsCount + 1)
                     frontier.add(child)
 
 
@@ -216,14 +239,14 @@ class Maze():
 
 
 if len(sys.argv) != 2:
-    sys.exit("Usage: python maze.py maze.txt")
+    sys.exit("Usage: python mazeh.py maze.txt")
 
 m = Maze(sys.argv[1])
 print("Maze:")
 m.print()
 print("Solving...")
-m.solve()
+m.solve(optimizeHeuristic=True)
 print("States Explored:", m.num_explored)
 print("Solution:")
 m.print()
-m.output_image("maze.png", show_explored=True)
+m.output_image("output.png", show_explored=True)
