@@ -79,6 +79,17 @@ Method for learning a function Q(s, a), estimate of the value of performing acti
     Q(s, a) <-- Q(s, a) + alpha * ((r + betha*MAXa'Q(s', a')) - Q(s, a))
     ```
 
+## Unsuupervised Learning
+
+Given input data without any additional feedback, learn patterns
+
+### clustering
+
+Organizating a set of objects into groups in such a way that similar objects tend to be the same group
+
+#### K-means clustering
+
+Algorithm for clustering data based on repeatedly assigning points to clusters and updating those cluters' centers
 
 ## Bibliography
 Lecture: https://cs50.harvard.edu/ai/2024/notes/4/
